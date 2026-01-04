@@ -104,6 +104,12 @@ function buildAST(input: DefineSchemaInput): SchemaAST {
   const entities: SchemaAST["entities"] = {};
 
   for (const [entityName, entityDef] of Object.entries(input)) {
+    if (typeof entityDef !== "object" || entityDef === null) {
+      throw new Error(
+        `Entity definition for "${entityName}" must be an object`
+      );
+    }
+
     entities[entityName] = {
       name: entityName,
       relations: buildRelationNodes(entityDef.relations ?? {}),

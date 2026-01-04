@@ -269,4 +269,44 @@ test.group("Schema validation and compilation", () => {
     assert.include(dsl, "permission read = viewers or downloaders");
     assert.include(dsl, "permission download = downloaders");
   });
+
+  test("should throw error if entity definition is not an object", ({
+    assert
+  }) => {
+    assert.throws(() => {
+      // @ts-ignore - Runtime check test
+      defineSchema({
+        user: "invalid-definition"
+      });
+    }, 'Entity definition for "user" must be an object');
+  });
+
+  test("should throw error if entity definition is not an object", ({
+    assert
+  }) => {
+    assert.throws(() => {
+      try {
+        defineSchema({
+          role: {
+            attributes: {
+              name: "string"
+            }
+          },
+          attachment: {
+            relations: {
+              viewers: ["role"],
+              downloaders: ["role"]
+            },
+            permission: {
+              read: "viewers union downloaders",
+              download: "downloaders"
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Error caught:", error);
+        throw error;
+      }
+    });
+  });
 });
