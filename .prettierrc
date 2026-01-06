@@ -1,4 +1,4 @@
 {
-    "trailingComma": "none",
-    "insertEnter": false
+  "trailingComma": "none",
+  "endOfLine": "lf"
 }

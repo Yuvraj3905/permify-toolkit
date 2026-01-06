@@ -15,7 +15,8 @@ export default await julr({
     "prettier/prettier": [
       "error",
       {
-        trailingComma: "none"
+        trailingComma: "none",
+        endOfLine: "lf"
       }
     ],
     "unicorn/filename-case": [
@@ -23,7 +24,8 @@ export default await julr({
       {
         case: "kebabCase"
       }
-    ]
+    ],
+    "eol-last": ["error", "always"]
   },
   ignorePatterns: [
     "packages/**/node_modules/**",
