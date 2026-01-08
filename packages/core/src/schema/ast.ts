@@ -5,7 +5,7 @@ export type SchemaAST = {
 export type EntityNode = {
   name: string;
   relations: Record<string, RelationNode>;
-  permission: Record<string, PermissionNode>;
+  permissions: Record<string, PermissionNode>;
   attributes: Record<string, AttributeNode>;
 };
 

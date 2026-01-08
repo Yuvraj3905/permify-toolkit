@@ -16,7 +16,7 @@ export function compileToPermify(ast: SchemaAST): string {
       out += `  relation ${rel.name} @${rel.target.join(" or ")}\n`;
     }
 
-    for (const perm of Object.values(entity.permission)) {
+    for (const perm of Object.values(entity.permissions)) {
       out += `  permission ${perm.name} = ${perm.expression}\n`;
     }
 

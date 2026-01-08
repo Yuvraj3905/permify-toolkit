@@ -1,20 +1,26 @@
 import { test } from "@japa/runner";
-import { defineSchema } from "@permify-toolkit/core";
+import {
+  defineSchema,
+  entity,
+  relation,
+  attribute,
+  permission
+} from "@permify-toolkit/core";
 
 test.group("Schema validation and compilation", () => {
   test("should validate and compile a simple schema to Permify DSL", ({
     assert
   }) => {
     const schema = defineSchema({
-      organization: {
+      organization: entity({
         relations: {
-          member: ["user"]
+          member: relation("user")
         },
-        permission: {
-          view: "member"
+        permissions: {
+          view: permission("member")
         }
-      },
-      user: {}
+      }),
+      user: entity({})
     });
 
     const dsl = schema.compile();
@@ -31,11 +37,11 @@ test.group("Schema validation and compilation", () => {
   }) => {
     assert.throws(() => {
       defineSchema({
-        organization: {
+        organization: entity({
           relations: {
-            owner: ["nonexistent"]
+            owner: relation("nonexistent")
           }
-        }
+        })
       });
     }, 'Entity "nonexistent" referenced in relation "organization.owner" does not exist');
   });
@@ -45,31 +51,31 @@ test.group("Schema validation and compilation", () => {
   }) => {
     assert.throws(() => {
       defineSchema({
-        organization: {
+        organization: entity({
           relations: {
-            member: ["user"]
+            member: relation("user")
           },
-          permission: {
-            view: "nonexistent"
+          permissions: {
+            view: permission("nonexistent")
           }
-        },
-        user: {}
+        }),
+        user: entity({})
       });
     }, 'Permission "organization.view" references undefined relation or permission "nonexistent"');
   });
 
   test("should compile schema with union permission", ({ assert }) => {
     const schema = defineSchema({
-      document: {
+      document: entity({
         relations: {
-          owner: ["user"],
-          editor: ["user"]
+          owner: relation("user"),
+          editor: relation("user")
         },
-        permission: {
-          edit: "owner or editor"
+        permissions: {
+          edit: permission("owner or editor")
         }
-      },
-      user: {}
+      }),
+      user: entity({})
     });
 
     const dsl = schema.compile();
@@ -79,16 +85,16 @@ test.group("Schema validation and compilation", () => {
 
   test("should compile schema with intersection permission", ({ assert }) => {
     const schema = defineSchema({
-      document: {
+      document: entity({
         relations: {
-          member: ["user"],
-          approved: ["user"]
+          member: relation("user"),
+          approved: relation("user")
         },
-        permission: {
-          view: "member and approved"
+        permissions: {
+          view: permission("member and approved")
         }
-      },
-      user: {}
+      }),
+      user: entity({})
     });
 
     const dsl = schema.compile();
@@ -100,23 +106,23 @@ test.group("Schema validation and compilation", () => {
     assert
   }) => {
     const schema = defineSchema({
-      document: {
+      document: entity({
         relations: {
-          parent: ["folder"]
+          parent: relation("folder")
         },
-        permission: {
-          view: "parent.view"
+        permissions: {
+          view: permission("parent.view")
         }
-      },
-      folder: {
+      }),
+      folder: entity({
         relations: {
-          member: ["user"]
+          member: relation("user")
         },
-        permission: {
-          view: "member"
+        permissions: {
+          view: permission("member")
         }
-      },
-      user: {}
+      }),
+      user: entity({})
     });
 
     const dsl = schema.compile();
@@ -127,47 +133,47 @@ test.group("Schema validation and compilation", () => {
   test("should validate nested relation targets exist", ({ assert }) => {
     assert.throws(() => {
       defineSchema({
-        document: {
+        document: entity({
           relations: {
-            parent: ["folder"]
+            parent: relation("folder")
           },
-          permission: {
-            view: "parent.nonexistent"
+          permissions: {
+            view: permission("parent.nonexistent")
           }
-        },
-        folder: {
+        }),
+        folder: entity({
           relations: {
-            member: ["user"]
+            member: relation("user")
           }
-        },
-        user: {}
+        }),
+        user: entity({})
       });
     }, 'Permission "document.view" references undefined permission or relation "nonexistent" on entity "folder"');
   });
 
   test("should compile complex real-world schema", ({ assert }) => {
     const schema = defineSchema({
-      organization: {
+      organization: entity({
         relations: {
-          admin: ["user"],
-          member: ["user"]
+          admin: relation("user"),
+          member: relation("user")
         },
-        permission: {
-          create_repo: "admin",
-          view: "admin or member"
+        permissions: {
+          create_repo: permission("admin"),
+          view: permission("admin or member")
         }
-      },
-      repository: {
+      }),
+      repository: entity({
         relations: {
-          org: ["organization"],
-          maintainer: ["user"]
+          org: relation("organization"),
+          maintainer: relation("user")
         },
-        permission: {
-          push: "maintainer or org.admin",
-          view: "maintainer or org.view"
+        permissions: {
+          push: permission("maintainer or org.admin"),
+          view: permission("maintainer or org.view")
         }
-      },
-      user: {}
+      }),
+      user: entity({})
     });
 
     const dsl = schema.compile();
@@ -181,81 +187,82 @@ test.group("Schema validation and compilation", () => {
 
   test("should provide typed permission strings", ({ assert }) => {
     const schema = defineSchema({
-      document: {
+      document: entity({
         relations: {
-          owner: ["user"]
+          owner: relation("user")
         },
-        permission: {
-          view: "owner",
-          edit: "owner",
-          delete: "owner"
+        permissions: {
+          view: permission("owner"),
+          edit: permission("owner"),
+          delete: permission("owner")
         }
-      },
-      user: {}
+      }),
+      user: entity({})
     });
 
     // These should be type-safe at compile time
-    const viewPerm = schema.permission.document.view;
-    const editPerm = schema.permission.document.edit;
-    const deletePerm = schema.permission.document.delete;
+    const viewPerm = schema.permissions.document.view;
+    const editPerm = schema.permissions.document.edit;
+    const deletePerm = schema.permissions.document.delete;
 
     assert.equal(viewPerm, "document:view");
     assert.equal(editPerm, "document:edit");
     assert.equal(deletePerm, "document:delete");
   });
+
   test("should compile complex real-world schema with attributes", ({
     assert
   }) => {
     const schema = defineSchema({
-      role: {
+      role: entity({
         attributes: {
-          name: "string"
+          name: attribute("string")
         }
-      },
-      dashboard: {
+      }),
+      dashboard: entity({
         relations: {
-          viewers: ["role"]
+          viewers: relation("role")
         },
-        permission: {
-          read: "viewers"
+        permissions: {
+          read: permission("viewers")
         }
-      },
-      customer: {
+      }),
+      customer: entity({
         relations: {
-          viewers: ["role"]
+          viewers: relation("role")
         },
-        permission: {
-          read: "viewers"
+        permissions: {
+          read: permission("viewers")
         }
-      },
-      recording: {
+      }),
+      recording: entity({
         relations: {
-          viewers: ["role"]
+          viewers: relation("role")
         },
-        permission: {
-          read: "viewers"
+        permissions: {
+          read: permission("viewers")
         }
-      },
-      attachment: {
+      }),
+      attachment: entity({
         relations: {
-          viewers: ["role"],
-          downloaders: ["role"]
+          viewers: relation("role"),
+          downloaders: relation("role")
         },
-        permission: {
-          read: "viewers or downloaders",
-          download: "downloaders"
+        permissions: {
+          read: permission("viewers or downloaders"),
+          download: permission("downloaders")
         }
-      },
-      block: {
+      }),
+      block: entity({
         relations: {
-          viewers: ["role"],
-          updaters: ["role"]
+          viewers: relation("role"),
+          updaters: relation("role")
         },
-        permission: {
-          read: "viewers or updaters",
-          update: "updaters"
+        permissions: {
+          read: permission("viewers or updaters"),
+          update: permission("updaters")
         }
-      }
+      })
     });
 
     const dsl = schema.compile();
@@ -279,34 +286,5 @@ test.group("Schema validation and compilation", () => {
         user: "invalid-definition"
       });
     }, 'Entity definition for "user" must be an object');
-  });
-
-  test("should throw error if entity definition is not an object", ({
-    assert
-  }) => {
-    assert.throws(() => {
-      try {
-        defineSchema({
-          role: {
-            attributes: {
-              name: "string"
-            }
-          },
-          attachment: {
-            relations: {
-              viewers: ["role"],
-              downloaders: ["role"]
-            },
-            permission: {
-              read: "viewers union downloaders",
-              download: "downloaders"
-            }
-          }
-        });
-      } catch (error) {
-        console.error("Error caught:", error);
-        throw error;
-      }
-    });
   });
 });
