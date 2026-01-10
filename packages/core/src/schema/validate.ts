@@ -40,7 +40,7 @@ function validateEntityPermissions(
   ast: SchemaAST,
   entity: SchemaAST["entities"][string]
 ): void {
-  for (const permission of Object.values(entity.permission)) {
+  for (const permission of Object.values(entity.permissions)) {
     validatePermissionExpression(ast, entity, permission);
   }
 }
@@ -56,7 +56,7 @@ function validateEntityPermissions(
 function validatePermissionExpression(
   ast: SchemaAST,
   entity: SchemaAST["entities"][string],
-  permission: SchemaAST["entities"][string]["permission"][string]
+  permission: SchemaAST["entities"][string]["permissions"][string]
 ): void {
   // Extract identifiers from expression (split by operators, parens, whitespace)
   const identifiers = extractIdentifiers(permission.expression);
@@ -86,7 +86,7 @@ function extractIdentifiers(expression: string): string[] {
 function validateNestedReference(
   ast: SchemaAST,
   entity: SchemaAST["entities"][string],
-  permission: SchemaAST["entities"][string]["permission"][string],
+  permission: SchemaAST["entities"][string]["permissions"][string],
   reference: string
 ): void {
   const [relationName, targetPermName] = reference.split(".");
@@ -108,7 +108,8 @@ function validateNestedReference(
       continue;
     }
 
-    const hasPermission = targetEntity.permission[targetPermName] !== undefined;
+    const hasPermission =
+      targetEntity.permissions[targetPermName] !== undefined;
     const hasRelation = targetEntity.relations[targetPermName] !== undefined;
 
     if (!hasPermission && !hasRelation) {
@@ -124,11 +125,11 @@ function validateNestedReference(
  */
 function validateLocalReference(
   entity: SchemaAST["entities"][string],
-  permission: SchemaAST["entities"][string]["permission"][string],
+  permission: SchemaAST["entities"][string]["permissions"][string],
   reference: string
 ): void {
   const hasRelation = entity.relations[reference] !== undefined;
-  const hasPermission = entity.permission[reference] !== undefined;
+  const hasPermission = entity.permissions[reference] !== undefined;
 
   if (!hasRelation && !hasPermission) {
     throw new Error(
