@@ -1,8 +1,8 @@
 import path from "node:path";
 import fs from "node:fs/promises";
 import { Args, Command, Flags } from "@oclif/core";
-import type { DefineSchemaInput } from "@permify-toolkit/core";
-import { defineSchema, writeSchemaToPermify } from "@permify-toolkit/core";
+import type { SchemaInput } from "@permify-toolkit/core";
+import { schema, writeSchemaToPermify } from "@permify-toolkit/core";
 
 export default class SchemaPush extends Command {
   static description = "Push Permify schema to the server";
@@ -61,11 +61,11 @@ export default class SchemaPush extends Command {
   }
 
   /**
-   * TODO -> add JOI validation before defineSchema
+   * TODO -> add JOI validation before schema
    */
   private buildSchema(input: unknown) {
     try {
-      return defineSchema(input as DefineSchemaInput);
+      return schema(input as SchemaInput);
     } catch (err: any) {
       this.error(`Invalid schema definition:\n${err.message}`);
     }

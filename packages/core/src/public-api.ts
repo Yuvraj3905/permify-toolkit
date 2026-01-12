@@ -1,10 +1,10 @@
 export {
-  defineSchema,
+  schema,
   entity,
   relation,
   attribute,
   permission,
-  type DefineSchemaInput,
+  type SchemaInput,
   type SchemaHandle,
   type PermissionProxy,
   type EntityDef,
