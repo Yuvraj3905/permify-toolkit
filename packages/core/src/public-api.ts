@@ -16,3 +16,9 @@ export {
 export { relationsOf } from "./schema/helpers.js";
 
 export { writeSchemaToPermify } from "./schema/write-schema.js";
+
+export {
+  defineConfig,
+  validateConfig,
+  type PermifyConfig as Config
+} from "./config.js";
