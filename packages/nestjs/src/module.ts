@@ -1,7 +1,7 @@
 import { Module, Global } from "@nestjs/common";
 import type { DynamicModule, Provider } from "@nestjs/common";
 
-import { PermifyService } from "./permify.service";
+import { PermifyService } from "./service";
 import { PERMIFY_MODULE_OPTIONS } from "./constant";
 import type {
   PermifyModuleOptions,

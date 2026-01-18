@@ -1,8 +1,8 @@
 import { test } from "@japa/runner";
 import { Test } from "@nestjs/testing";
 
-import { PermifyModule } from "../src/permify.module.js";
-import { PermifyService } from "../src/permify.service.js";
+import { PermifyModule } from "../src/module.js";
+import { PermifyService } from "../src/service.js";
 
 test.group("PermifyModule", () => {
   test("should compile the module and resolve service", async ({ assert }) => {
