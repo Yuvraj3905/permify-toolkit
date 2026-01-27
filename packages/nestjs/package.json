@@ -29,6 +29,10 @@
     "rxjs": "^7.8.2"
   },
   "devDependencies": {
+    "@nestjs/common": "^11.1.12",
+    "@nestjs/core": "^11.1.12",
+    "@nestjs/testing": "^11.1.12",
+    "rxjs": "^7.8.1",
     "ts-node": "^10.x",
     "typescript": "^4.x"
   }
