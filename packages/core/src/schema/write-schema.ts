@@ -35,7 +35,7 @@ export async function writeSchemaToPermify(params: {
     throw new Error("AST is required");
   }
 
-  const client = params.client || createPermifyClient(endpoint);
+  const client = params.client || createPermifyClient({ endpoint });
   let createdTenant = false;
 
   if (createTenantIfNotExists) {

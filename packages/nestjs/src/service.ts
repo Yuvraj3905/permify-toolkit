@@ -1,8 +1,8 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { createPermifyClient } from "@permify-toolkit/core";
 
-import { PERMIFY_MODULE_OPTIONS } from "./constant";
-import type { PermifyModuleOptions } from "./interfaces";
+import { PERMIFY_MODULE_OPTIONS } from "./constant.js";
+import type { PermifyModuleOptions } from "./interfaces.js";
 
 @Injectable()
 export class PermifyService {

@@ -19,7 +19,8 @@
   "types": "dist/nestjs/src/index.d.ts",
   "scripts": {
     "test": "echo \"No tests in nestjs yet\" && exit 0",
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' --fix"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.12",
