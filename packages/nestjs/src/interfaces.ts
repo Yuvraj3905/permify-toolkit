@@ -1,5 +1,12 @@
-import type { PermifyClientOptions } from "@permify-toolkit/core";
 import type { ExecutionContext, ModuleMetadata, Type } from "@nestjs/common";
+
+export interface PermifyClientOptions {
+  endpoint: string;
+  cert?: string;
+  insecure?: boolean;
+  pk?: string;
+  certChain?: string;
+}
 
 export interface PermifyModuleOptions {
   client: PermifyClientOptions;

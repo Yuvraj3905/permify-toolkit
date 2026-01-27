@@ -1,23 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "incremental": true,
-    "target": "es2017",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "baseUrl": "./",
-    "module": "commonjs",
-    "strictBindCallApply": false,
-    "strictNullChecks": false,
-    "noFallthroughCasesInSwitch": false,
-    "noImplicitAny": false,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "declaration": true,
-    "outDir": "./dist",
-    "removeComments": true,
-    "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": false,
-    "skipLibCheck": true
+    "outDir": "./dist"
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
