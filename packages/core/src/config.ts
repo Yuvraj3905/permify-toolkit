@@ -1,13 +1,5 @@
+import type { PermifyClientOptions } from "./client/index.js";
 import type { SchemaHandle } from "./schema/define-schema.js";
-
-export interface PermifyClientOptions {
-  endpoint: string;
-  cert?: string;
-  insecure?: boolean;
-  pk?: string;
-  certChain?: string;
-  metadata?: Record<string, string>;
-}
 
 export interface PermifyConfigOptions {
   client: PermifyClientOptions;
