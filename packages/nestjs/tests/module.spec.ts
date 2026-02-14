@@ -13,7 +13,10 @@ test.group("PermifyModule", () => {
             endpoint: "localhost:3478",
             insecure: true
           },
-          tenantResolver: () => "tenant-1"
+          resolvers: {
+            tenant: () => "tenant-1",
+            subject: () => "user-1"
+          }
         })
       ]
     }).compile();
@@ -32,7 +35,10 @@ test.group("PermifyModule", () => {
               endpoint: "localhost:3478",
               insecure: true
             },
-            tenantResolver: () => "tenant-2"
+            resolvers: {
+              tenant: () => "tenant-2",
+              subject: () => "user-2"
+            }
           })
         })
       ]
@@ -40,6 +46,31 @@ test.group("PermifyModule", () => {
 
     const service = moduleRef.get(PermifyService);
     assert.exists(service);
-    assert.exists(service.getTenantResolver());
+    assert.exists(service.resolveTenant);
+  });
+
+  test("should compile with subject resolver returning object", async ({
+    assert
+  }) => {
+    const moduleRef = await Test.createTestingModule({
+      imports: [
+        PermifyModule.forRoot({
+          client: {
+            endpoint: "localhost:3478",
+            insecure: true
+          },
+          resolvers: {
+            tenant: () => "tenant-1",
+            subject: () => ({
+              type: "user",
+              id: "user-1"
+            })
+          }
+        })
+      ]
+    }).compile();
+
+    const service = moduleRef.get(PermifyService);
+    assert.exists(service);
   });
 });

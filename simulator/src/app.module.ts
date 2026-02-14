@@ -3,13 +3,12 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
 import { PermifyModule } from '@permify-toolkit/nestjs';
+import { clientOptionsFromEnv } from '@permify-toolkit/core';
 
 @Module({
   imports: [
     PermifyModule.forRoot({
-      client: {
-        endpoint: 'localhost:3476',
-      },
+      client: clientOptionsFromEnv(),
       tenantResolver: () => 'tenant-1',
     }),
   ],
