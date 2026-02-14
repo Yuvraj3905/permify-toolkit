@@ -1,16 +1,27 @@
+import type { PermifyClientOptions } from "@permify-toolkit/core";
 import type { ExecutionContext, ModuleMetadata, Type } from "@nestjs/common";
 
-export interface PermifyClientOptions {
-  endpoint: string;
-  cert?: string;
-  insecure?: boolean;
-  pk?: string;
-  certChain?: string;
+export interface PermifySubject {
+  type: string;
+  id: string;
+}
+
+export type TenantResolver = (
+  context: ExecutionContext
+) => string | Promise<string>;
+
+export type SubjectResolver = (
+  context: ExecutionContext
+) => string | PermifySubject | Promise<string | PermifySubject>;
+
+export interface PermifyResolvers {
+  tenant: TenantResolver;
+  subject?: SubjectResolver;
 }
 
 export interface PermifyModuleOptions {
   client: PermifyClientOptions;
-  tenantResolver: (context: ExecutionContext) => string | Promise<string>;
+  resolvers: PermifyResolvers;
 }
 
 export interface PermifyModuleOptionsFactory {

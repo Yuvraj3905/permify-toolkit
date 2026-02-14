@@ -16,6 +16,6 @@ export class PermifyService {
   }
 
   getTenantResolver() {
-    return this.options.tenantResolver;
+    return this.options.resolvers.tenant;
   }
 }
