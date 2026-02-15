@@ -6,7 +6,7 @@ A NestJS wrapper for Permify, providing easy integration for authorization in yo
 
 - **Global Configuration**: Configure Permify client and resolvers once at the module level.
 - **Hierarchical Resolvers**: Define tenant and subject resolvers globally, and override them at the Controller or Route level.
-- **Dependency Injection**: Inject `PermifyService` to access the Permify client anywhere in your app.
+- **Authorization Guard**: Use `PermifyGuard` to enforce permissions on your routes.
 
 ## Getting Started
 
@@ -76,6 +76,11 @@ import * as fs from "fs";
         subject: (context) => {
           const req = context.switchToHttp().getRequest();
           return req.user?.id;
+        },
+        // Global Resource Resolver (Optional)
+        resource: (context) => {
+          const req = context.switchToHttp().getRequest();
+          return req.params.id;
         }
       }
     })
@@ -114,7 +119,8 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
         resolvers: {
           tenant: (ctx) =>
             ctx.switchToHttp().getRequest().headers["x-tenant-id"],
-          subject: (ctx) => ctx.switchToHttp().getRequest().user?.id
+          subject: (ctx) => ctx.switchToHttp().getRequest().user?.id,
+          resource: (ctx) => ctx.switchToHttp().getRequest().params.id
         }
       })
     })
@@ -144,7 +150,8 @@ import { Controller, Get } from "@nestjs/common";
 import { PermifyResolvers } from "@permify-toolkit/nestjs";
 
 @PermifyResolvers({
-  tenant: () => "controller-tenant-id" // Overrides global tenant for all methods in this controller
+  tenant: () => "controller-tenant-id", // Overrides global tenant for all methods in this controller
+  resource: (ctx) => "controller-resource"
 })
 @Controller("cats")
 export class CatsController {
@@ -155,7 +162,8 @@ export class CatsController {
 
   @PermifyResolvers({
     tenant: () => "route-tenant-id", // Overrides controller tenant for this method
-    subject: () => "route-subject-id" // Overrides global subject for this method
+    subject: () => "route-subject-id", // Overrides global subject for this method
+    resource: (ctx) => "route-resource"
   })
   @Get("specific")
   findSpecific() {
@@ -163,3 +171,70 @@ export class CatsController {
   }
 }
 ```
+
+## Authorization Guard
+
+The package provides `PermifyGuard` to enforce permissions on your routes. It automatically resolves the tenant, subject, and resource from the context and checks permissions against Permify.
+
+### Usage
+
+1.  **Register the Guard**: You can register it globally or per-route.
+2.  **Decorate Routes**: Use `@CheckPermission` to specify the required permission.
+
+suppose this is your schema:
+
+```typescript
+schema({
+  document: entity({
+    relations: {
+      owner: relation("user"),
+      viewer: relation("user")
+    },
+    permissions: {
+      view: permission("viewer or owner"),
+      edit: permission("owner")
+    }
+  })
+});
+```
+
+then the controller will be:
+
+```typescript
+import { Controller, Get, UseGuards } from "@nestjs/common";
+import {
+  PermifyGuard,
+  CheckPermission,
+  PermifyResolvers
+} from "@permify-toolkit/nestjs";
+
+// supposing tenant resolver is defined in the global configuration
+@PermifyResolvers({
+  subject: (ctx) => ctx.switchToHttp().getRequest().user?.id,
+  resource: (ctx) => ctx.params.id
+})
+// this could also be written as:
+// @PermifyResolvers({
+//   subject: { type: "user", id: "user-id" },
+//   resource: { type: "document", id: "doc-id" }
+// })
+@Controller("documents")
+export class DocumentsController {
+  @UseGuards(PermifyGuard)
+  // the permission is checked against the resolved resource that is defined in
+  // the schema, as per the schema above, the document entity has view and edit
+  // permissions, and this guard will allow access only if the subject has viewer
+  // or owner relation on the resolved resource
+  @CheckPermission("document.view")
+  @Get(":id")
+  view() {
+    return "You have access!";
+  }
+}
+```
+
+The guard will:
+
+1.  Resolve the **Tenant**, **Subject**, and **Resource** using your configured resolvers.
+2.  Check if the **Subject** has `document.view` permission on the resolved **Resource**.
+3.  Throw a `ForbiddenException` if permission is denied or if the resource cannot be resolved.

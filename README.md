@@ -150,7 +150,7 @@ pnpm test -- --files client.spec.ts
 We're actively working on expanding the toolkit. Here's what's coming:
 
 - [x] Relationship seeding from `relationship.json` files (CLI)
-- [ ] Authorization guards for NestJS package
+- [x] Authorization guards for NestJS package
 - [ ] Full-stack example app (frontend + NestJS backend)
 - [ ] Release v1.0.0 and publish to npm
 - [ ] Docs

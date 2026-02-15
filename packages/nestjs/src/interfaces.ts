@@ -21,9 +21,14 @@ export type SubjectResolver = (
   context: ExecutionContext
 ) => string | PermifySubject | Promise<string | PermifySubject>;
 
+export type ResourceResolver = (
+  context: ExecutionContext
+) => string | PermifySubject | Promise<string | PermifySubject>;
+
 export interface PermifyResolvers {
   tenant: TenantResolver;
   subject?: SubjectResolver;
+  resource?: ResourceResolver;
 }
 
 /**

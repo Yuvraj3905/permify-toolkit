@@ -14,7 +14,7 @@ import { PermifyResolvers } from "../src/interfaces.js";
 
 function createMockContext(
   handler: ((...args: any[]) => any) | undefined,
-  cls: Type<any>
+  cls: Type<any> | undefined
 ): ExecutionContext {
   return {
     getHandler: () => handler,
@@ -154,18 +154,101 @@ test.group("PermifyResolvers Precedence", () => {
       TestController
     );
 
-    // Route defines subject, but NOT tenant.
-    // Logic: Get resolvers from Route.
-    // Resolvers = { subject: ... }
-    // resolvers.tenant is undefined.
-    // Fallback?
-    // Code says: `const resolver = resolvers?.tenant || this.options.resolvers.tenant;`
-    // So it falls back to GLOBAL.
-    // It does NOT check Controller, because `getAllAndOverride` returned Route metadata.
-    // Controller metadata is ignored completely.
-    // This matches "No merging" between Route and Controller.
-
     assert.equal(await service.resolveSubject(context), "route-subject-only");
     assert.equal(await service.resolveTenant(context), "global-tenant");
+  });
+
+  test("should resolve Resource from Route > Controller > Global", async ({
+    assert
+  }) => {
+    @PermifyResolvers({
+      resource: () => "controller-resource"
+    })
+    @Controller()
+    class TestController {
+      @PermifyResolvers({
+        resource: () => "route-resource"
+      })
+      @Get()
+      testRoute() {}
+
+      @Get("controller-level")
+      testControllerLevel() {}
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [Reflector],
+      controllers: [TestController],
+      imports: [
+        PermifyModule.forRoot({
+          client: { endpoint: "localhost:3478", insecure: true },
+          resolvers: {
+            tenant: () => "global-tenant",
+            resource: () => "global-resource"
+          }
+        })
+      ]
+    }).compile();
+
+    const service = moduleRef.get(PermifyService);
+
+    // 1. Route Level
+    const contextRoute = createMockContext(
+      TestController.prototype.testRoute,
+      TestController
+    );
+    assert.equal(await service.resolveResource(contextRoute), "route-resource");
+
+    // 2. Controller Level
+    const contextController = createMockContext(
+      TestController.prototype.testControllerLevel,
+      TestController
+    );
+    assert.equal(
+      await service.resolveResource(contextController),
+      "controller-resource"
+    );
+
+    // 3. Global Level (Generic Context)
+    const contextGlobal = createMockContext(undefined, TestController);
+    assert.equal(
+      await service.resolveResource(contextGlobal),
+      "controller-resource"
+    );
+  });
+
+  test("should resolve from Global if Resource is missing in overrides", async ({
+    assert
+  }) => {
+    @PermifyResolvers({
+      tenant: () => "controller-tenant"
+    })
+    @Controller()
+    class TestController {
+      @Get()
+      testRoute() {}
+    }
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [Reflector],
+      controllers: [TestController],
+      imports: [
+        PermifyModule.forRoot({
+          client: { endpoint: "localhost:3478", insecure: true },
+          resolvers: {
+            tenant: () => "global-tenant",
+            resource: () => "global-resource"
+          }
+        })
+      ]
+    }).compile();
+
+    const service = moduleRef.get(PermifyService);
+    const context = createMockContext(
+      TestController.prototype.testRoute,
+      TestController
+    );
+
+    assert.equal(await service.resolveResource(context), "global-resource");
   });
 });
