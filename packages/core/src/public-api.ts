@@ -34,3 +34,8 @@ export {
   writeRelationships,
   type Relationship
 } from "./data/write-relationships.js";
+
+export {
+  checkPermission,
+  type CheckPermissionParams
+} from "./permission/check-permission.js";
