@@ -1,7 +1,7 @@
 import { test } from "@japa/runner";
 
-import RelationshipSeed from "../src/commands/relationships/seed.js";
 import { runCommand, stripAnsi } from "./helpers.js";
+import RelationshipSeed from "../src/commands/relationships/seed.js";
 
 test.group("Relationships Seed Command", () => {
   const seedFile = "relationships.json";

@@ -1,7 +1,7 @@
 import { test } from "@japa/runner";
 
-import SchemaPush from "../src/commands/schema/push.js";
 import { runCommand, stripAnsi } from "./helpers.js";
+import SchemaPush from "../src/commands/schema/push.js";
 
 test.group("Schema Push Command", () => {
   test("should fail if no tenant is provided", async ({ assert }) => {
